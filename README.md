@@ -42,6 +42,32 @@ pip install -r requirements.txt
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
 
+## Testing PawPal+
+
+Run the full test suite from the project root:
+
+```bash
+python -m pytest
+```
+
+### What the tests cover
+
+| Area | Tests | What is verified |
+|---|---|---|
+| **Task basics** | 3 | `mark_complete` flips status; `add_task` grows the list; pet name is stamped on each task |
+| **Sorting** | 3 | Tasks sort chronologically by `"HH:MM"` time; tasks without a time sort last; `sort_by_duration` orders correctly |
+| **Recurrence** | 5 | `next_occurrence` advances `due_date` by `recur_days`; weekly tasks advance by 7; one-time tasks raise `ValueError`; `mark_task_complete` spawns a new task on both the pet and scheduler; one-time completion returns `None` |
+| **Conflict detection** | 3 | Same-pet time collision is flagged; cross-pet collision is flagged; different time slots produce no warning |
+| **Edge cases** | 4 | Empty task list generates an empty plan; tasks exceeding the time budget are skipped; completed tasks are excluded from `get_pending_tasks`; `filter_by_pet` returns only the matching pet's tasks |
+
+### Confidence level
+
+★★★★☆ (4 / 5)
+
+All 18 tests pass. The happy paths and most common edge cases are covered. The remaining gap is duration-based overlap detection — the conflict checker only flags exact time-slot matches, not cases where one task's duration runs into the next task's start time. That would require additional tests (and logic) to fully verify.
+
+---
+
 ## Smarter Scheduling
 
 Beyond the basic priority-and-time-budget plan, the scheduler includes four additional algorithms:
