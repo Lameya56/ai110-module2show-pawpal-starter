@@ -1,0 +1,76 @@
+classDiagram
+
+    class Task {
+        +str title
+        +int duration_minutes
+        +str priority
+        +bool is_completed
+        +int recur_days
+        +str pet_name
+        +str scheduled_time
+        +date due_date
+        +priority_value() int
+        +mark_complete() None
+        +next_occurrence() Task
+        +to_dict() dict
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +int age
+        +str special_needs
+        +list~Task~ tasks
+        +get_summary() str
+        +add_task(task) None
+        +get_pending_tasks() list~Task~
+        +get_tasks_by_status(completed) list~Task~
+    }
+
+    class Owner {
+        +str name
+        +int available_minutes
+        +str preferences
+        +list~Pet~ pets
+        +set_availability(minutes) None
+        +add_pet(pet) None
+        +get_all_tasks() list~Task~
+        +get_pending_tasks() list~Task~
+        +get_tasks_for_pet(pet_name) list~Task~
+        +get_recurring_tasks() list~Task~
+    }
+
+    class DailyPlan {
+        +list~Task~ tasks
+        +int total_duration
+        +str reasoning
+        +list~str~ conflicts
+        +add_task(task) None
+        +get_summary() str
+    }
+
+    class Scheduler {
+        +list~Task~ tasks
+        +int available_minutes
+        +Pet pet
+        +generate_plan() DailyPlan
+        +filter_by_pet(pet_name) list~Task~
+        +filter_by_status(completed) list~Task~
+        +sort_by_time(tasks) list~Task~
+        +sort_by_duration(tasks, ascending) list~Task~
+        +explain_plan(plan) str
+        +mark_task_complete(task, pet) Task
+        +check_time_conflicts() list~str~
+        -_sort_by_priority(tasks) list~Task~
+        -_expand_recurring(tasks) list~Task~
+        -_detect_conflicts(planned) list~str~
+        -_detect_time_conflicts(tasks) list~str~
+        -_build_reasoning(sorted_tasks, plan) str
+    }
+
+    Owner "1" *-- "0..*" Pet : owns
+    Pet "1" *-- "0..*" Task : has
+    Scheduler --> DailyPlan : creates
+    Scheduler --> Task : reads / mutates
+    Scheduler --> Pet : calls add_task
+    Task --> Task : next_occurrence()

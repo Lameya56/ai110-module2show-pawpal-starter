@@ -1,6 +1,39 @@
 # PawPal+ (Module 2 Project)
 
-You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
+**PawPal+** is an intelligent pet care scheduler built with Python and Streamlit. It helps busy pet owners plan daily care tasks across multiple pets — factoring in time budgets, task priorities, recurring schedules, and time-slot conflicts.
+
+---
+
+## 📸 Demo
+
+![alt text](image.png)
+---
+
+## Features
+
+### Core scheduling
+- **Priority-based planning** — Tasks are ranked `high → medium → low`. The scheduler greedily selects the highest-priority tasks that fit within the owner's available time budget for the day.
+- **Time budget enforcement** — Any task whose duration would push the total over `available_minutes` is automatically skipped and listed in a "Skipped tasks" section.
+- **Plan explanation** — After generating a schedule, the app explains how many tasks were selected, how much time they use, and which tasks were left out and why.
+
+### Sorting
+- **Sort by scheduled time** — Tasks are displayed in chronological `HH:MM` order using a lambda key on the time string. Because `"HH:MM"` strings sort lexicographically the same way they sort chronologically, no date parsing is required. Tasks without a set time always sort to the end.
+- **Sort by duration** — Tasks can also be ordered shortest-to-longest (or reversed), useful for seeing quick wins first.
+
+### Filtering
+- **Filter by pet** — View only the tasks assigned to a specific pet, making it easy to review one animal's workload at a time.
+- **Filter by status** — Narrow the task list to `Pending` or `Done` tasks to track what still needs to happen today.
+
+### Recurring tasks
+- **Daily and weekly recurrence** — Each task carries a `recur_days` field (`0` = one-time, `1` = daily, `7` = weekly, etc.).
+- **Auto-spawn on completion** — When `mark_task_complete()` is called on a recurring task, a fresh copy is automatically created with `due_date = today + timedelta(days=recur_days)` and registered back on the pet and scheduler pool. Recurring care never silently falls off the list.
+
+### Conflict detection
+- **Time-slot collision warnings** — `check_time_conflicts()` groups all pending tasks by their `scheduled_time`. If two or more tasks share the same slot (same pet or different pets), a plain-text warning is returned instead of raising an exception, so the app stays running and shows the owner exactly which tasks conflict and at what time.
+- **Duplicate title detection** — The scheduler also flags if the same task title is queued more than once for the same pet on the same day.
+- **Over-budget task warning** — Any individual task whose duration alone exceeds the total available time is flagged explicitly.
+
+---
 
 ## Scenario
 
