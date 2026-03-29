@@ -12,13 +12,25 @@ The three core actions a user should be able to perform in PawPal+:
 
 3. **Generate and view today's plan** — The user triggers the scheduler, which takes the current task list and any time or priority constraints and produces a daily schedule. The plan is displayed with an explanation of why tasks were ordered the way they were, so the owner understands the reasoning and can trust the output.
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+The initial UML design includes five classes: `Pet`, `Task`, `Owner`, `DailyPlan`, and `Scheduler`.
+
+- **Pet** — a data container for the animal's basic profile: name, species, age, and any special needs. Its only method, `get_summary()`, returns a readable description. It holds no logic.
+
+- **Task** — a data container for a single care activity. It stores a title, duration in minutes, a priority label (low/medium/high), and a completion flag. It has a `mark_complete()` method to flip the flag and a `to_dict()` method for display.
+
+- **Owner** — ties together the person using the app, their time budget for the day, and the list of tasks they've created. It also holds a reference to their one Pet. `set_availability()` lets the UI update the time budget.
+
+- **DailyPlan** — the output object produced by the Scheduler. It holds the ordered list of selected tasks, the total duration of those tasks, and a plain-text reasoning string. `add_task()` appends to the list; `get_summary()` formats the plan for display.
+
+- **Scheduler** — the only class with real logic. It receives a task list, a time budget, and optionally a Pet reference, then produces a `DailyPlan` via `generate_plan()` and a human-readable explanation via `explain_plan()`.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+After reviewing the skeleton, two issues were identified and fixed:
+
+1. **Added `pet` parameter to `Scheduler`** — The original design passed only `tasks` and `available_minutes` to the Scheduler, meaning pet-specific context (age, special needs) was completely inaccessible during scheduling. For example, a senior pet's medication task should arguably be treated as high priority regardless of what the owner labeled it. Adding `pet` as an optional parameter gives the Scheduler the information it needs to make those adjustments later.
+
+2. **Added `priority_value` property to `Task`** — Priority was stored as the string `"low"`, `"medium"`, or `"high"`. Sorting tasks by priority in `generate_plan()` would have required comparing strings directly, which is fragile. The `priority_value` property maps those labels to integers (1, 2, 3), so sorting becomes a simple numeric comparison: `sorted(tasks, key=lambda t: t.priority_value, reverse=True)`.
 
 ---
 
