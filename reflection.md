@@ -43,8 +43,13 @@ After reviewing the skeleton, two issues were identified and fixed:
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+**Tradeoff: Exact time-slot matching instead of overlap detection based on duration**
+
+The current conflict detector flags two tasks as a conflict only when their `scheduled_time` strings are exactly equal (e.g., both set to `"07:00"`). It does not check whether one task's *duration* causes it to run into another task's start time. For example, a 30-minute walk starting at `07:00` would not be flagged as conflicting with a 5-minute feeding starting at `07:15`, even though the walk is still in progress at that moment.
+
+This is a deliberate simplicity tradeoff. Implementing true interval-overlap detection would require converting `"HH:MM"` strings into `datetime` objects, computing each task's end time as `start + timedelta(minutes=duration)`, and then checking every pair of tasks for `start_a < end_b and start_b < end_a`. That is roughly O(n²) in comparisons and adds meaningful parsing and error-handling complexity (e.g., what if `scheduled_time` is missing or malformed?).
+
+For a daily pet-care planner where tasks are short, loosely scheduled, and entered by a single owner, exact-match detection catches the most common and obvious mistake — accidentally assigning two things to the same time slot — without introducing fragile time-arithmetic logic. A pet owner noticing a `[TIME CONFLICT]` warning on `07:00` can immediately understand and fix it. A more precise overlap warning like *"Morning walk ends at 07:30, which overlaps with Brush teeth starting at 07:15"* would be more accurate but also more complex to implement correctly and interpret quickly. The simpler strategy is the right fit for this scope.
 
 ---
 
